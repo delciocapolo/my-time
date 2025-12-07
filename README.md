@@ -13,3 +13,6 @@ Com uma interface simples, leve e rápida, o My Time adapta-se ao nosso fluxo di
 - Aplicação leve e segura graças à estrutura Tauri
 
 **My Time — o teu espaço de foco, organização e evolução.**
+
+**Antes de instalar, certifica-te de ter os pre-requisitos.**
+Saiba mais em: [Tauri - prerequisites](https://tauri.app/start/prerequisites/)
