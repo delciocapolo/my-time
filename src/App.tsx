@@ -1,50 +1,104 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { LogicalSize } from "@tauri-apps/api/dpi";
+import { Activity, useEffect, useRef } from "react";
+import Timer from "./components/app/timer";
+import { useAppContext } from "./global/context/app";
+import TasksSection from "./components/molecules/controls/molecules/handle-create-task/task-section";
+import * as console from "@tauri-apps/plugin-log";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
-
-  async function greet() {
-    setGreetMsg(await invoke("greet", { name }));
-  }
-
-  return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
-  );
+namespace NodeJS {
+  export type Timeout = ReturnType<typeof setTimeout>;
 }
 
-export default App;
+export default function App() {
+  const { isWindowFocused, mode } = useAppContext();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  const resizeWindow = async () => {
+    if (!contentRef.current) return;
+
+    try {
+      const webview = getCurrentWebviewWindow();
+      
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      const rect = contentRef.current.getBoundingClientRect();
+      const width = Math.max(300, Math.ceil(rect.width));
+      const height = Math.ceil(rect.height) + 120;
+      
+      await webview.setSize(new LogicalSize(width, height));
+    } catch (error) {
+      await console.error(JSON.stringify(error));
+    }
+  }
+  
+  const resizeWindowDecrease = async () => {
+    if (!contentRef.current) return;
+
+    try {
+      const webview = getCurrentWebviewWindow();
+      
+      // Aguarda renderização completa
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      const heightDifference: number = 70; // mode === "focus" ? 70 : 53 // TODO: revisar depois
+      const rect = contentRef.current.getBoundingClientRect();
+      const width = Math.max(300, Math.ceil(rect.width));
+      const height = Math.ceil(rect.height) + heightDifference;
+      
+      await webview.setSize(new LogicalSize(width, height));
+    } catch (error) {
+      await console.error(JSON.stringify(error));
+    }
+  };
+
+  const debouncedResize = () => {
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
+    
+    resizeTimeoutRef.current = setTimeout(() => {
+      resizeWindow();
+    }, 100);
+  };
+
+  useEffect(() => {
+    if (isWindowFocused) {
+      resizeWindow();
+    } else {
+      resizeWindowDecrease();
+    }
+  }, [isWindowFocused]);
+
+  useEffect(() => {
+    resizeWindow();
+
+    if (!contentRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      debouncedResize();
+    });
+
+    observer.observe(contentRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div ref={contentRef} className="w-full space-y-5">
+      <Timer />
+      
+      <Activity mode={mode === "pomodoro" ? "visible" : "hidden"}>
+        <div className="w-full">
+          <TasksSection />
+        </div>
+      </Activity>
+    </div>
+  );
+}

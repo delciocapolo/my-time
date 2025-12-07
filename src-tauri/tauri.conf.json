@@ -13,12 +13,27 @@
     "windows": [
       {
         "title": "my-time",
-        "width": 240,
-        "height": 100
+        "width": 300,
+        "height": 205,
+        "minWidth": 300,
+        "minHeight": 205,
+        "titleBarStyle": "Overlay",
+        "resizable": true,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": false,
+        "shadow": false
       }
     ],
     "security": {
       "csp": null
+    },
+    "macOSPrivateApi": true
+  },
+  "plugins": {
+    "sql": {
+      "preload": ["sqlite:my-time-database.db"]
     }
   },
   "bundle": {
