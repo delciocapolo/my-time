@@ -17,7 +17,7 @@ export default function ClockFocusesComponent() {
                 <SelectTrigger 
                     className={cn("py-0 data-[size=default]:h-8 border-none dark:bg-background text-foreground focus-visible:ring-gray-600 dark:hover:bg-gray-500/15", mode !== "pomodoro" ? "rounded-none rounded-r-sm" : "rounded-none")}
                 >
-                    <SelectValue placeholder="Estado do tempo" />
+                    <SelectValue placeholder="Modo" />
                 </SelectTrigger>
             {/* </TooltipBox> */}
             <SelectContent 

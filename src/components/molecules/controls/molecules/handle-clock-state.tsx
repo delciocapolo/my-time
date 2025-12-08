@@ -21,7 +21,7 @@ export default function ClockStateComponent() {
                         dark:hover:bg-gray-500/15
                     "
                 >
-                    <SelectValue placeholder="Estado do tempo" />
+                    <SelectValue placeholder="Estado" />
                 </SelectTrigger>
             {/* </TooltipBox> */}
             <SelectContent 
