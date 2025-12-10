@@ -25,13 +25,12 @@ export default function TasksSection() {
     return (
         <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
-                <AccordionTrigger 
-                    className="flex-col gap-2 items-center pb-4 pt-0 px-3"
-                >
+                <AccordionTrigger className="flex-col gap-2 items-center pb-4 pt-0 px-3">
                     <TaskItem task={tasks[0]} className="w-full" />
                 </AccordionTrigger>
+                
                 <AccordionContent className="pb-0">
-                    <ul className="space-y-2 rounded-lg overflow-x-hidden max-h-45 custom-scroll">
+                    <ul className="space-y-2 rounded-lg overflow-x-hidden max-h-52 custom-scroll">
                         {
                             tasks
                             .slice(1)

@@ -141,7 +141,7 @@
 
    html,
    body {
-      @apply h-full w-full overflow-x-hidden font-roboto scrollbar-hidden bg-transparent rounded-2xl;
+      @apply h-full w-full overflow-hidden font-roboto scrollbar-hidden bg-transparent;
 
       @media (prefers-color-scheme: dark) {
          color-scheme: dark;
@@ -153,6 +153,6 @@
    }
 
    #root {
-      @apply rounded-2xl scrollbar-hidden bg-transparent overflow-hidden;
+      @apply scrollbar-hidden bg-transparent overflow-hidden @container;
    }
 }

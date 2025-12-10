@@ -1,5 +1,4 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
-import TooltipBox from "../../tooltip-box";
 import { useAppContext } from "@src/global/context/app";
 import { cn } from "@src/utils";
 
@@ -13,13 +12,11 @@ export default function ClockFocusesComponent() {
 
     return (
         <Select value={mode} onValueChange={setMode}>
-            {/* <TooltipBox title="Estado do Tempo"> */}
-                <SelectTrigger 
-                    className={cn("py-0 data-[size=default]:h-8 border-none dark:bg-background text-foreground focus-visible:ring-gray-600 dark:hover:bg-gray-500/15", mode !== "pomodoro" ? "rounded-none rounded-r-sm" : "rounded-none")}
-                >
-                    <SelectValue placeholder="Estado do tempo" />
-                </SelectTrigger>
-            {/* </TooltipBox> */}
+            <SelectTrigger 
+                className={cn("py-0 data-[size=default]:h-8 border-none dark:bg-background text-foreground focus-visible:ring-gray-600 dark:hover:bg-gray-500/15", mode !== "pomodoro" ? "rounded-none rounded-r-sm" : "rounded-none")}
+            >
+                <SelectValue placeholder="Modo" />
+            </SelectTrigger>
             <SelectContent 
                 className="bg-background text-foreground border-gray-300 dark:border-gray-600"
                 position="popper"

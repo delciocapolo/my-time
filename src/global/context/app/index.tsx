@@ -162,20 +162,17 @@ export const AppProvider = ({ children }: ComponentProps) => {
         await console.info("[AppContext] Timer reset");
     };
 
-    // Inicia um único ciclo de timer
+   // Inicia um único ciclo de timer
     const startSingleTimer = async () => {
         await console.info("[AppContext] Starting single timer cycle...");
         
-        // Define o tempo de término
         const initialSeconds = getInitialTime(mode);
         endTime.current = addSeconds(new Date(), initialSeconds);
 
-        // Limpa qualquer timer anterior
         if (timerInterval.current) {
             clearInterval(timerInterval.current);
         }
 
-        // Atualiza o relógio a cada segundo
         timerInterval.current = setInterval(async () => {
             if (!endTime.current) return;
 
@@ -183,55 +180,64 @@ export const AppProvider = ({ children }: ComponentProps) => {
             const remaining = differenceInSeconds(endTime.current, now);
 
             if (remaining <= 0) {
-                // Timer acabou
                 await stopTimer();
                 setClock("00:00");
                 
                 await console.info("[AppContext] Timer cycle completed!");
                 
-                // Completa a tarefa apenas no modo pomodoro
                 if (mode === "pomodoro") {
                     const taskCompleted = await completeFirstTask();
-                    
-                    // Aguarda um momento para o estado atualizar
                     await new Promise(resolve => setTimeout(resolve, 500));
                     
-                    // Verifica novamente com o valor atualizado
                     const stillHasTasks = hasIncompleteTasks();
                     
                     if (taskCompleted && stillHasTasks && isRunningCycle.current) {
-                        // Ainda há tarefas, reinicia o timer automaticamente
                         await console.info("[AppContext] Restarting timer for next task...");
                         await startSingleTimer();
                     } else {
-                        // Todas as tarefas completadas ou ciclo parado
-                        isRunningCycle.current = false;
-                        handleClockState("stop");
-                        await console.info("[AppContext] All tasks completed or cycle stopped!");
+                        // Pára completamente
+                        await handleTimerComplete();
                     }
                 } else {
-                    // Para outros modos, apenas para
-                    isRunningCycle.current = false;
-                    handleClockState("stop");
+                    await handleTimerComplete();
                 }
             } else {
-                // Atualiza o display
                 setClock(formatTime(remaining));
             }
         }, 1000);
+    };
+
+    // Nova função para finalizar o timer
+    const handleTimerComplete = async () => {
+        isRunningCycle.current = false;
+        await resetTimer();
+        setClockState("stop");
+        await console.info("[AppContext] Timer cycle finished");
     };
 
     // Inicia o ciclo completo de timers
     const startTimerCycle = async () => {
         if (!hasIncompleteTasks()) {
             await console.warn("[AppContext] No incomplete tasks to start timer");
-            handleClockState("stop");
+            setClockState("stop");
             return;
         }
 
         await console.info("[AppContext] Starting timer cycle for all tasks...");
         isRunningCycle.current = true;
         await startSingleTimer();
+    };
+
+    const handleClockStateChange = async () => {
+        if (clockState === "start") {
+            await startTimerCycle();
+        } else if (clockState === "stop") {
+            isRunningCycle.current = false;
+            await stopTimer();
+        } else if (clockState === "refresh") {
+            await resetTimer();
+            setClockState("stop");
+        }
     };
 
     // Effect para sincronizar tasks com tasksRef
@@ -241,15 +247,7 @@ export const AppProvider = ({ children }: ComponentProps) => {
 
     // Effect para gerenciar o timer baseado no estado
     useEffect(() => {
-        if (clockState === "start") {
-            startTimerCycle();
-        } else if (clockState === "stop") {
-            isRunningCycle.current = false;
-            stopTimer();
-        } else if (clockState === "refresh") {
-            resetTimer();
-            setClockState("stop");
-        }
+        handleClockStateChange();
 
         return () => {
             isRunningCycle.current = false;
