@@ -1,57 +1,56 @@
+import { Activity, useEffect, useRef } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { LogicalSize } from "@tauri-apps/api/dpi";
-import { Activity, useEffect, useRef } from "react";
 import Timer from "./components/app/timer";
 import { useAppContext } from "./global/context/app";
 import TasksSection from "./components/molecules/controls/molecules/handle-create-task/task-section";
 import * as console from "@tauri-apps/plugin-log";
 
-namespace NodeJS {
-  export type Timeout = ReturnType<typeof setTimeout>;
+type HandleResizeWindowProps = {
+  heightPixels: number;
+  appWindowRef: HTMLDivElement;
+}
+async function handleResizeWindow({ appWindowRef, heightPixels }: HandleResizeWindowProps) {
+  try {
+      const webview = getCurrentWebviewWindow();
+      
+      // Obter o tamanho atual da janela em pixels lógicos
+      const currentSize = await webview.innerSize();
+      const scaleFactor = await webview.scaleFactor();
+      
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      const rect = appWindowRef.getBoundingClientRect();
+      // Converter para pixels lógicos e usar a largura atual
+      const width = currentSize.width / scaleFactor;
+      const height = (Math.ceil(rect.height) + heightPixels);
+      
+      await webview.setSize(new LogicalSize(width, height));
+    } catch (error) {
+      await console.error(JSON.stringify(error));
+    }
 }
 
 export default function App() {
-  const { isWindowFocused, mode } = useAppContext();
+  const { mode, isWindowFocused } = useAppContext();
   const contentRef = useRef<HTMLDivElement>(null);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const resizeWindow = async () => {
+  const increaseResizeWindow = async () => {
     if (!contentRef.current) return;
-
-    try {
-      const webview = getCurrentWebviewWindow();
-      
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      
-      const rect = contentRef.current.getBoundingClientRect();
-      const width = Math.max(300, Math.ceil(rect.width));
-      const height = Math.ceil(rect.height) + 120;
-      
-      await webview.setSize(new LogicalSize(width, height));
-    } catch (error) {
-      await console.error(JSON.stringify(error));
-    }
+    handleResizeWindow({ 
+      appWindowRef: contentRef.current,
+      heightPixels: 150
+    });
   }
   
-  const resizeWindowDecrease = async () => {
+  const decreaseResizeWindow = async () => {
     if (!contentRef.current) return;
-
-    try {
-      const webview = getCurrentWebviewWindow();
-      
-      // Aguarda renderização completa
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      
-      const heightDifference: number = 70; // mode === "focus" ? 70 : 53 // TODO: revisar depois
-      const rect = contentRef.current.getBoundingClientRect();
-      const width = Math.max(300, Math.ceil(rect.width));
-      const height = Math.ceil(rect.height) + heightDifference;
-      
-      await webview.setSize(new LogicalSize(width, height));
-    } catch (error) {
-      await console.error(JSON.stringify(error));
-    }
-  };
+    handleResizeWindow({ 
+      appWindowRef: contentRef.current,
+      heightPixels: 75
+    });
+  }
 
   const debouncedResize = () => {
     if (resizeTimeoutRef.current) {
@@ -59,21 +58,19 @@ export default function App() {
     }
     
     resizeTimeoutRef.current = setTimeout(() => {
-      resizeWindow();
+      increaseResizeWindow();
     }, 100);
   };
 
   useEffect(() => {
     if (isWindowFocused) {
-      resizeWindow();
+      increaseResizeWindow();
     } else {
-      resizeWindowDecrease();
+      decreaseResizeWindow();
     }
   }, [isWindowFocused]);
 
   useEffect(() => {
-    resizeWindow();
-
     if (!contentRef.current) return;
 
     const observer = new ResizeObserver(() => {
@@ -84,21 +81,20 @@ export default function App() {
 
     return () => {
       observer.disconnect();
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
     };
   }, []);
 
   return (
-    <div ref={contentRef} className="w-full space-y-5">
-      <Timer />
-      
-      <Activity mode={mode === "pomodoro" ? "visible" : "hidden"}>
-        <div className="w-full">
-          <TasksSection />
-        </div>
-      </Activity>
+    <div ref={contentRef} className="sm:max-w-md mx-auto">
+      <div className="w-full space-y-3">
+        <Timer />
+        
+        <Activity mode={mode === "pomodoro" ? "visible" : "hidden"}>
+          <div className="w-full">
+            <TasksSection />
+          </div>
+        </Activity>
+      </div>
     </div>
   );
 }

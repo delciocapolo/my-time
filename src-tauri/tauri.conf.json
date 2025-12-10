@@ -13,17 +13,9 @@
     "windows": [
       {
         "title": "my-time",
-        "width": 300,
-        "height": 205,
-        "minWidth": 300,
-        "minHeight": 205,
-        "titleBarStyle": "Overlay",
-        "resizable": true,
-        "decorations": false,
-        "transparent": true,
-        "alwaysOnTop": true,
-        "skipTaskbar": false,
-        "shadow": false
+        "width": 350,
+        "height": 320,
+        "alwaysOnTop": true
       }
     ],
     "security": {

@@ -8,7 +8,7 @@ export default function Timer() {
     const { clock } = useAppContext();
 
     return (
-        <div className="py-1 flex-center">
+        <div className="flex-center">
             {/* <Input
                 className="
                     text-center text-display-72 text-5xl font-medium py-3 outline-none border-none
