@@ -1,8 +1,8 @@
-# Descrição
-
 # Conceito
 
 > O Método Pomodoro funciona dividindo o trabalho em blocos de 25 minutos de foco total (um "pomodoro"), seguidos por pausas curtas de 5 minutos, para evitar a fadiga e manter a concentração, com uma pausa maior de 15-30 minutos após quatro pomodoros; o objetivo é aumentar a produtividade fracionando tarefas e usando um cronômetro para guiar os ciclos de trabalho e descanso, transformando o tempo em um jogo divertido e gerenciável, eliminando distrações.
+
+# Descrição
 
 **My Time** é uma aplicação minimalista e produtiva, desenvolvida com Tauri, que ajuda-nos a manter o foco e gerir melhor o nosso tempo. Inspirado na técnica Pomodoro, o My Time divide o nosso trabalho em ciclos equilibrados de foco e descanso, permitindo-nos alcançar mais resultados com menos stress.
 
