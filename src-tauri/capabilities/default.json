@@ -17,6 +17,7 @@
     "sql:default",
     "sql:allow-execute",
     "log:default",
-    "notification:default"
+    "notification:default",
+    "updater:default"
   ]
 }
