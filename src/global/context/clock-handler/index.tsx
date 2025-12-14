@@ -16,8 +16,10 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
     const instanceAudio = usePlaySound({ path: '/assets/notification-sound/completed-task.wav' });
     const timerInterval = useRef<NodeJS.Timeout | null>(null);
     const endTime = useRef<Date | null>(null);
+    // this variables are used for ontroll state and other things
     const isRunningCycle = useRef<boolean>(false);
     const isPauseToNewCycle = useRef<boolean>(false);
+    const isAutomaticModeChange = useRef<boolean>(false);
     
     // handlers
     const setIsRunningCycle = (state: boolean) => {
@@ -81,9 +83,15 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
 
     const switchModeCycle = async (newMode: AppMode) => {
         isPauseToNewCycle.current = (newMode === "pause");
+        isAutomaticModeChange.current = true;
         
         await console.info(`[AppContext] Switching mode from ${mode} to ${newMode}`);
         setMode(newMode);
+        
+        setTimeout(() => {
+            isAutomaticModeChange.current = false;
+        }, 200);
+        
         return newMode;
     }
 
@@ -121,7 +129,7 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
                                 const newMode = await switchModeCycle("pause");
                                 setTimeout(async () => {
                                     await startSingleTimer(newMode);
-                                }, 100);
+                                }, 150);
                             } else {
                                 await handleTimerComplete();
                             }
@@ -132,7 +140,7 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
                                 const newMode = await switchModeCycle("pomodoro");
                                 setTimeout(async () => {
                                     await startSingleTimer(newMode);
-                                }, 100);
+                                }, 150);
                             } else {
                                 await handleTimerComplete();
                             }
@@ -193,8 +201,8 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
     }, [clockState]);
 
     useEffect(() => {
-        // só reseta o timer se for uma mudança manual (usuário) e não estiver em ciclo automático
-        if (!isRunningCycle.current) {
+        if (!isAutomaticModeChange.current && !isRunningCycle.current) {
+            console.info(`[AppContext] Manual mode change detected, resetting timer`);
             resetTimer();
         }
     }, [mode]);
@@ -203,6 +211,7 @@ export const ClockHandlerProvider = ({ children }: ComponentProps) => {
         return () => {
             isRunningCycle.current = false;
             isPauseToNewCycle.current = false;
+            isAutomaticModeChange.current = false;
         }
     }, []);
 
