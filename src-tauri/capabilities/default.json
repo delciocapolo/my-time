@@ -16,6 +16,7 @@
     "core:window:allow-close",
     "sql:default",
     "sql:allow-execute",
-    "log:default"
+    "log:default",
+    "notification:default"
   ]
 }

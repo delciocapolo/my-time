@@ -25,8 +25,12 @@ export default function TasksSection() {
     return (
         <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
-                <AccordionTrigger className="flex-col gap-2 items-center pb-4 pt-0 px-3">
-                    <TaskItem task={tasks[0]} className="w-full" />
+                <AccordionTrigger className="flex-col gap-2 items-center pb-4 pt-0 px-3 hover:no-underline">
+                    <TaskItem 
+                        task={tasks[0]} 
+                        className="w-full"
+                        onClick={(event) => event.stopPropagation()}
+                    />
                 </AccordionTrigger>
                 
                 <AccordionContent className="pb-0">

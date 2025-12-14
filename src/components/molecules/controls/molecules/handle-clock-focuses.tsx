@@ -1,17 +1,29 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { useAppContext } from "@src/global/context/app";
+import { AppMode } from "@src/global/context/app/types";
+import { useClockHandlerContext } from "@src/global/context/clock-handler";
 import { cn } from "@src/utils";
 
+const items = [
+    { id: "pomodoro", label: "Pomodoro" },
+    { id: "focus", label: "Foco" },
+    { id: "pause", label: "Pausa" },
+];
+
 export default function ClockFocusesComponent() {
-    const { setMode, mode } = useAppContext();
-    const items = [
-        { id: "pomodoro", label: "Pomodoro" },
-        { id: "focus", label: "Foco" },
-        { id: "pause", label: "Pausa" },
-    ];
+    const { setMode, mode, } = useAppContext();
+    const { setIsRunningCycle, } = useClockHandlerContext();
+
+    // handlers
+    const onChandeMode = (value: AppMode) => {
+        setIsRunningCycle(false);
+        setTimeout(() => {
+            setMode(value);
+        }, 100);
+    }
 
     return (
-        <Select value={mode} onValueChange={setMode}>
+        <Select value={mode} onValueChange={onChandeMode}>
             <SelectTrigger 
                 className={cn("py-0 data-[size=default]:h-8 border-none dark:bg-background text-foreground focus-visible:ring-gray-600 dark:hover:bg-gray-500/15", mode !== "pomodoro" ? "rounded-none rounded-r-sm" : "rounded-none")}
             >
